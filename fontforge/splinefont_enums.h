@@ -124,7 +124,7 @@ enum openflags {
 enum ps_flags {
     ps_flag_nohintsubs = 0x10000,
     ps_flag_noflex = 0x20000,
-    ps_flag_nohints = 0x40000,
+    ps_flag_nohints = 1U << 31,
     ps_flag_restrict256 = 0x80000,
     ps_flag_afm = 0x100000,
     ps_flag_pfm = 0x200000,
