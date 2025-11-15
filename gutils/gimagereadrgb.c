@@ -249,7 +249,8 @@ GImage *GImageReadRgb(char *filename) {
 	/* working with Verbatim image data*/
 	if ( header.chans==1 && header.bpc==1 ) {
 	    for ( i=0; i<header.height; ++i ) {
-		fread(base->data + (header.height-1-i)*base->bytes_per_line,header.width,1,fp);
+		if (fread(base->data + (header.height-1-i)*base->bytes_per_line,header.width,1,fp) != 1)
+		    goto errorGImageReadRgbFile;
 		if ( header.pixmax!=255 ) {
 		    pt = (unsigned char *) (base->data+(header.height-1-i)*base->bytes_per_line);
 		    for ( end=pt+header.width; pt<end; ++pt )
@@ -303,8 +304,10 @@ GImage *GImageReadRgb(char *filename) {
 		    b[j] = k*255L/header.pixmax;
 		}
 		if ( header.chans==4 ) {
-		    fread(a,header.width,1,fp);
-		    fread(a,header.width,1,fp);
+		    if (fread(a,header.width,1,fp) != 1)
+			goto errorGImageReadRgbFile;
+		    if (fread(a,header.width,1,fp) != 1)
+			goto errorGImageReadRgbFile;
 		}
 		ipt = (unsigned long *) (base->data + (header.height-1-i)*base->bytes_per_line);
 		rpt = r; gpt = g; bpt = b;
