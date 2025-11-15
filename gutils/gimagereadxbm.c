@@ -118,7 +118,8 @@ GImage *GImageReadXbm(char * filename) {
 		    ++j;
 		}
 	    }
-	    fscanf(file,",");
+	    if ( fscanf(file,",") == EOF && (j + 1 < base->bytes_per_line || i + 1 < height ) )
+		goto errorGImageReadXbm;
 	}
     }
     fclose(file);
