@@ -218,8 +218,8 @@ static long *FindObjects(struct pdfcontext *pc) {
 	    ret = realloc(ret,(start+num+1)*sizeof(long));
 	    gen = realloc(gen,(start+num)*sizeof(int));
 	    if ( ret==NULL || gen==NULL || pc->ocnt!=start+num ) {
-		free(ret); free(ret_old);
-		free(gen); free(gen_old);
+		free(ret ? ret : ret_old);
+		free(gen ? gen : gen_old);
 		NoMoreMemMessage(); pc->ocnt = 0;
 		return( NULL );
 	    }
