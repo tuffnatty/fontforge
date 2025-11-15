@@ -3588,7 +3588,7 @@ static StemInfo *SameH(StemInfo *old,real start, real width,
 	    unblended[1][j] += unblended[1][j-1];
 	}
 	for ( sameh=old; sameh!=NULL; sameh=sameh->next ) {
-	    if ( (*sameh->u.unblended)[0] == NULL || (*sameh->u.unblended)[1]==NULL )
+	    if ( sameh->u.unblended == NULL )
 	continue;
 	    if ( UnblendedCompare((*sameh->u.unblended)[0],unblended[0],instance_count)==0 &&
 		    UnblendedCompare((*sameh->u.unblended)[1],unblended[1],instance_count)==0)
