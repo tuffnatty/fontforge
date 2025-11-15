@@ -47,6 +47,14 @@
 #  define PRINTF_FORMAT_ATTRIBUTE(x, y)
 #endif
 
+// Like strncpy() but always NUL-terminates
+static inline void strtcpy(char *to, const char *from, int size) {
+    int len = strnlen(from, size);
+    len -= (len == size);
+    memcpy(to, from, len);
+    to[len] = '\0';
+}
+
 extern bool SetupUCharMap(const char* unichar_name, const char* local_name, bool is_local_utf8);
 
 extern char *copy(const char *);

@@ -338,7 +338,7 @@ void SFReplaceEncodingBDFProps(SplineFont *sf,EncMap *map) {
 	BDFPropReplace(bdf,"CHARSET_ENCODING", enc);
 	BDFPropReplace(bdf,"CHARSET_COLLECTIONS",buffer);
 	if ( (bpt = BdfPropHasString(bdf,"FONT", NULL))!=NULL ) {
-	    strncpy(buffer,bpt,sizeof(buffer)); buffer[sizeof(buffer)-1] = '\0';
+	    strtcpy(buffer,bpt,sizeof(buffer));
 	    pt = strrchr(buffer,'-');
 	    if ( pt!=NULL ) for ( --pt; pt>buffer && *pt!='-'; --pt );
 	    if ( pt>buffer ) {
@@ -584,28 +584,28 @@ void XLFD_CreateComponents(BDFFont *font,EncMap *map, int res, struct xlfd_compo
     decomposename(sffn, family_name, weight_name, slant,
 	    stylename, squeeze, font->sf->familyname, font->sf->weight);
     def_Charset_Enc(map,reg,enc);
-    strncpy(components->foundry,
+    strtcpy(components->foundry,
 	    BdfPropHasString(font,"FOUNDRY", font->foundry!=NULL?font->foundry:BDFFoundry==NULL?"FontForge":BDFFoundry),sizeof(components->foundry));
-    strncpy(components->family,
+    strtcpy(components->family,
 	    BdfPropHasString(font,"FAMILY_NAME", family_name),sizeof(components->family));
-    strncpy(components->weight,
+    strtcpy(components->weight,
 	    BdfPropHasString(font,"WEIGHT_NAME", weight_name),sizeof(components->weight));
-    strncpy(components->slant,
+    strtcpy(components->slant,
 	    BdfPropHasString(font,"SLANT", slant),sizeof(components->slant));
-    strncpy(components->setwidth,
+    strtcpy(components->setwidth,
 	    BdfPropHasString(font,"SETWIDTH_NAME", squeeze),sizeof(components->setwidth));
-    strncpy(components->add_style,
+    strtcpy(components->add_style,
 	    BdfPropHasString(font,"ADD_STYLE_NAME", stylename),sizeof(components->add_style));
     components->pixel_size = font->pixelsize;
     components->point_size = res==old_res ? BdfPropHasInt(font,"POINT_SIZE", pnt) : pnt;
     components->res_x = res;
     components->res_y = res;
-    strncpy(components->spacing,
+    strtcpy(components->spacing,
 	    BdfPropHasString(font,"SPACING", mono),sizeof(components->spacing));
     components->avg_width = avg;
-    strncpy(components->cs_reg,
+    strtcpy(components->cs_reg,
 	    BdfPropHasString(font,"CHARSET_REGISTRY", reg),sizeof(components->cs_reg));
-    strncpy(components->cs_enc,
+    strtcpy(components->cs_enc,
 	    BdfPropHasString(font,"CHARSET_ENCODING", enc),sizeof(components->cs_enc));
 
     components->foundry[sizeof(components->foundry)-1] = '\0';
