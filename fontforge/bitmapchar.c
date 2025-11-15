@@ -585,7 +585,7 @@ void XLFD_CreateComponents(BDFFont *font,EncMap *map, int res, struct xlfd_compo
 	    stylename, squeeze, font->sf->familyname, font->sf->weight);
     def_Charset_Enc(map,reg,enc);
     strncpy(components->foundry,
-	    BdfPropHasString(font,"FOUNDRY", font->foundry!=NULL?font->foundry:BDFFoundry==NULL?copy("FontForge"):BDFFoundry),sizeof(components->foundry));
+	    BdfPropHasString(font,"FOUNDRY", font->foundry!=NULL?font->foundry:BDFFoundry==NULL?"FontForge":BDFFoundry),sizeof(components->foundry));
     strncpy(components->family,
 	    BdfPropHasString(font,"FAMILY_NAME", family_name),sizeof(components->family));
     strncpy(components->weight,
