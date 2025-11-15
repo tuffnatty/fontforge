@@ -996,7 +996,7 @@ static void SCUndoAct(SplineChar *sc,int layer, Undoes *undo) {
 	    int uni = sc->unicodeenc;
 	    PST *possub = sc->possub;
 	    char *comment = sc->comment;
-	    sc->name = copy(undo->u.state.charname);
+	    sc->name = undo->u.state.charname;
 	    undo->u.state.charname = temp;
 	    sc->unicodeenc = undo->u.state.unicodeenc;
 	    undo->u.state.unicodeenc = uni;
