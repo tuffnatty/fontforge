@@ -52,7 +52,7 @@
 	char *from_ = (from);	\
 	int size_ = (size);	\
 	int len_ = strnlen(from_, size_);	\
-	*mempcpy((to), from_, len_ - (len_ == size_)) = 0;	\
+	*(char *)mempcpy((to), from_, len_ - (len_ == size_)) = 0;	\
 } while (0);
 
 extern bool SetupUCharMap(const char* unichar_name, const char* local_name, bool is_local_utf8);
