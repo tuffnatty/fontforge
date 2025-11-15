@@ -85,7 +85,7 @@ build_option(FONT_FAMILIES_LABEL     STRING "default"  "Font family names for la
 build_option(FONT_FAMILIES_MONO      STRING "default"  "Monospace font family names to use in the UI separated by commas")
 
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-  list(APPEND _test_flags CFLAGS -Wall -Werror=implicit-function-declaration -Werror=int-conversion -Wno-misleading-indentation)
+  list(APPEND _test_flags CFLAGS -Wall -Werror -Wno-misleading-indentation)
   if(CMAKE_GENERATOR STREQUAL "Ninja") # https://github.com/ninja-build/ninja/wiki/FAQ
     list(APPEND _test_flags BOTH -fdiagnostics-color=always)
   endif()
