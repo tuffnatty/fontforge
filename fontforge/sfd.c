@@ -1889,7 +1889,6 @@ static void SFDDumpOtfFeatNames(FILE *sfd, SplineFont *sf) {
     struct otfname *on;
 	bool cv[100] = {false};
 	int cvnum, cvcount, i;
-	char prefix[3] = {0};
 
     for ( fn=sf->feat_names; fn!=NULL; fn=fn->next ) {
 	if ( (fn->tag & 0xffff0000) == (('s' << 24) | ('s' << 16)) ) {
