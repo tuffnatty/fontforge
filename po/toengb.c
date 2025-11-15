@@ -27,7 +27,7 @@ struct {
     { "recognize", "recognise" },
     { "realize", "realise" },
 /* careful about meter/metre because parameter does not become parametre */
-    NULL
+    { NULL, NULL }
 };
 
 /* If we were to call the following function strcasestr(), on some
