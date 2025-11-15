@@ -781,7 +781,7 @@ return;
     if ( hdb->scs[0]->hstem==NULL && hdb->scs[0]->vstem==NULL )		/* Hints are turned off. Hint mask still remains though */
 return;
     for ( i=0; i<HntMax/8; ++i )
-	if ( to->hintmask[i]!=0 )
+	if ( (*to->hintmask)[i]!=0 )
     break;
     if ( i==HntMax/8 )		/* Empty mask */
 return;
