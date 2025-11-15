@@ -2125,7 +2125,7 @@ static void DrawVLine(CharView *cv,GWindow pixmap,real pos,Color fg, int flags,
 		GDrawDrawImage(pixmap,lock,NULL,x+5,3+cv->sfh);
 	}
 	if ( name!=NULL )
-	    GDrawDrawText8(pixmap,x+5,cv->sas+cv->sfh*(1+lock!=NULL)+3,name,-1,metricslabelcol);
+	    GDrawDrawText8(pixmap,x+5,cv->sas+cv->sfh*(1+(lock!=NULL))+3,name,-1,metricslabelcol);
     }
     if ( ItalicConstrained && cv->b.sc->parent->italicangle!=0 ) {
 	double t = tan(-cv->b.sc->parent->italicangle*FF_PI/180.);
