@@ -172,7 +172,8 @@ static int readpixels(FILE *file,struct bmpheader *head) {
     if ( head->bitsperpixel==8 && head->compression==0 ) {
 	excess = ((ll+3)/4)*4 -ll;
 	for ( i=0; i<head->height; ++i ) {
-	    fread(head->byte_pixels+i*ll,1,ll,file);
+	    if (fread(head->byte_pixels+i*ll,1,ll,file) != ll )
+		return( 0 );
 	    for ( j=0; j<excess; ++j )
 		(void) getc(file);
 	}
