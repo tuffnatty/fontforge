@@ -420,7 +420,8 @@ return;
 	    dup2(fileno(ps),1);
 	    if ( strrchr(tempname,'/')!=NULL ) {	/* See comment above */
 		*strrchr(tempname,'/') = '\0';
-		chdir(tempname);
+		if ( chdir(tempname) != 0 )
+		    exit(1);
 	    }
 	    exit(execvp(prog,(char * const *)arglist)==-1);	/* If exec fails, then die */
 	} else if ( pid!=-1 ) {
@@ -795,7 +796,8 @@ return( NULL );
     if ( (pid=fork())==0 ) {
 	/* Child */
 	int fd;
-	chdir(tempdir);
+	if ( chdir(tempdir) != 0 )
+	    exit(1);
 	if ( !mf_showerrors ) {
 	    close(1);		/* mf generates a lot of verbiage to stdout. Throw it away */
 	    fd = open("/dev/null",O_WRONLY);
