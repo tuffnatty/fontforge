@@ -3289,8 +3289,9 @@ char *getquotedeol(FILE *sfd) {
 	    /* So any other value of ch is assumed impossible. */
 	}
 	if ( pt>=end ) {
-	    pt = realloc(str,end-str+101);
-	    end = pt+(end-str)+100;
+	    int new_size = end - str + 101;
+	    pt = realloc(str, new_size);
+	    end = pt+new_size - 1;
 	    str = pt;
 	    pt = end-100;
 	}
@@ -3772,10 +3773,11 @@ static void SFDGetTtInstrs(FILE *sfd, SplineChar *sc) {
 
     while ( (ch=nlgetc(sfd))!=EOF ) {
 	if ( pt>=end ) {
-	    char *newbuf = realloc(buf,(end-buf+200));
-	    pt = newbuf+(pt-buf);
-	    end = newbuf+(end+200-buf);
-	    buf = newbuf;
+	    int new_size = end - buf + 200;
+	    int offset = pt - buf;
+	    buf = realloc(buf, new_size);
+	    pt = buf + offset;
+	    end = buf + new_size;
 	}
 	*pt++ = ch;
 	if ( pt-buf>backlen && strncmp(pt-backlen,end_tt_instrs,backlen)==0 ) {
@@ -3895,10 +3897,11 @@ static struct ttf_table *SFDGetTtTable(FILE *sfd, SplineFont *sf,struct ttf_tabl
 
     while ( (ch=nlgetc(sfd))!=EOF ) {
 	if ( pt>=end ) {
-	    char *newbuf = realloc(buf,(end-buf+200));
-	    pt = newbuf+(pt-buf);
-	    end = newbuf+(end+200-buf);
-	    buf = newbuf;
+	    int new_size = end - buf + 200;
+	    int offset = pt - buf;
+	    buf = realloc(buf, new_size);
+	    pt = buf + offset;
+	    end = buf + new_size;
 	}
 	*pt++ = ch;
 	if ( pt-buf>backlen && strncmp(pt-backlen,end_tt_instrs,backlen)==0 ) {
