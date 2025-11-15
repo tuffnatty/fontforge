@@ -5356,13 +5356,12 @@ static void readttfpostnames(FILE *ttf,struct ttfinfo *info) {
 	if ( info->chars[i]->name!=NULL )
     continue;
 	if ( info->ordering!=NULL )
-	    sprintf(buffer, "%.20s-%d", info->ordering, i );
+	    info->chars[i]->name = smprintf("%.20s-%d", info->ordering, i );
 	else if ( info->map!=NULL && info->map->backmap[i]!=-1 )
-	    sprintf(buffer, "nounicode.%d.%d.%x", info->platform, info->specific,
+	    info->chars[i]->name = smprintf("nounicode.%d.%d.%x", info->platform, info->specific,
 		    (int) info->map->backmap[i] );
 	else
-	    sprintf( buffer, "glyph%d", i );
-	info->chars[i]->name = copy(buffer);
+	    info->chars[i]->name = smprintf("glyph%d", i);
 	ff_progress_next();
     }
     ff_progress_next_stage();
