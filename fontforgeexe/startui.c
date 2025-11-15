@@ -606,7 +606,6 @@ int fontforge_main( int argc, char **argv ) {
     int ds, ld;
     int openflags=0;
     int doopen=0, quit_request=0;
-    bool use_cairo = true;
 
 #if !(GLIB_CHECK_VERSION(2, 35, 0))
     g_type_init();
@@ -801,6 +800,7 @@ int fontforge_main( int argc, char **argv ) {
     ensureDotFontForgeIsSetup();
 #if defined(__MINGW32__)
     //Load any custom fonts for the user interface
+    bool use_cairo = true;
     if (use_cairo) {
         const char *system_load = getShareDir();
         char *user_load = getFontForgeUserDir(Data);
