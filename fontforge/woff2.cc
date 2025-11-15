@@ -25,6 +25,8 @@
 #include <woff2/decode.h>
 #include <woff2/encode.h>
 
+#include <stdlib.h>  // calloc(), malloc()
+
 extern "C" {
 
 int woff2_convert_ttf_to_woff2(const uint8_t *data, size_t length, uint8_t **result, size_t *result_length)
