@@ -744,10 +744,10 @@ return( true );
 
 static int CompareSplines(Context *c,SplineChar *sc,const Undoes *cur,
 	real pt_err, real spline_err, int comp_hints, int diffs_are_errors ) {
-    int ret=0, failed=0, temp, ly;
-    const Undoes *layer;
+    int ret=0, failed=0, temp, ly=0;
+    const Undoes *layer = NULL;
     real err = pt_err>0 ? pt_err : spline_err;
-    SplinePoint *hmfail;
+    SplinePoint *hmfail = NULL;
 
     switch ( cur->undotype ) {
       case ut_state: case ut_statehint: case ut_statename:
@@ -1089,7 +1089,7 @@ static void SCAddBackgrounds(SplineChar *sc1,SplineChar *sc2) {
 
 static void SCCompare(SplineChar *sc1,SplineChar *sc2,struct font_diff *fd) {
     int layer, last;
-    int val;
+    int val = 0;
     SplinePoint *hmfail;
 
     if ( sc1->parent->multilayer && sc1->layer_cnt!=sc2->layer_cnt )
