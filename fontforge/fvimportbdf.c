@@ -1804,7 +1804,7 @@ static int PcfParse(FILE *file,struct toc *toc,SplineFont *sf,EncMap *map, BDFFo
 return( false );
     b->glyphcnt = b->glyphmax = mcnt;
     free(b->glyphs);
-    b->glyphs = calloc(mcnt,sizeof(BDFChar *));
+    b->glyphs = calloc((unsigned)mcnt,sizeof(BDFChar *));
     for ( i=0; i<mcnt; ++i ) {
 	BDFChar *bc = b->glyphs[i] = chunkalloc(sizeof(BDFChar));
 	memset( bc,'\0',sizeof( BDFChar ));
