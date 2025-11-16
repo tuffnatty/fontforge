@@ -840,7 +840,7 @@ static SplineSet *LayerAllOutlines(Layer *layer) {
 
     if ( layer->refs==NULL )
 return( layer->splines );
-    head = SplinePointListCopy(layer->splines);
+    last = head = SplinePointListCopy(layer->splines);
     if ( head!=NULL )
 	for ( last=head; last->next!=NULL; last=last->next );
     for ( r=layer->refs; r!=NULL; r=r->next ) {
