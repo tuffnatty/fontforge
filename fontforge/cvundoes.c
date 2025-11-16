@@ -1443,7 +1443,8 @@ return( copy(""));
     *len = ftell(svg);
     ret = malloc(*len);
     rewind(svg);
-    fread(ret,1,*len,svg);
+    if ( fread(ret,1,*len,svg) < *len )
+        *len = 0;
     fclose(svg);
 return( ret );
 }
@@ -1510,7 +1511,8 @@ return( copy(""));
     *len = ftell(svg);
     ret = malloc(*len);
     rewind(svg);
-    fread(ret,1,*len,svg);
+    if ( fread(ret,1,*len,svg) < *len )
+        *len = 0;
     fclose(svg);
 return( ret );
 }
@@ -1603,7 +1605,8 @@ return( copy(""));
     *len = ftell(eps);
     ret = malloc(*len);
     rewind(eps);
-    fread(ret,1,*len,eps);
+    if ( fread(ret,1,*len,eps) < *len )
+	*len = 0;
     fclose(eps);
 return( ret );
 }
