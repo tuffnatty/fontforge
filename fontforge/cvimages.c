@@ -251,7 +251,10 @@ void SCImportPlateFile(SplineChar *sc,int layer,FILE *plate,bool doclear,
 return;
 
     head = last = NULL;
-    fgets(buffer,sizeof(buffer),plate);
+    if ( fgets(buffer,sizeof(buffer),plate) == NULL ) {
+        ff_post_error(_("Read error"), _("Read error or premature end of file"));
+        return;
+    }
     if ( strncmp(buffer,"(plate",strlen("plate("))!=0 ) {
 	ff_post_error( _("Not a plate file"), _("This does not seem to be a plate file\nFirst line wrong"));
 return;
@@ -430,7 +433,10 @@ static BasePoint *slurppoints(FILE *fig,SplineFont *sf,int cnt ) {
     real ascent = 11*1200*sf->ascent/(sf->ascent+sf->descent);
 
     for ( i = 0; i<cnt; ++i ) {
-	fscanf(fig,"%d %d", &x, &y );
+	if ( fscanf(fig,"%d %d", &x, &y) < 2 ) {
+            free(bps);
+            return NULL;
+	}
 	bps[i].x = x*scale;
 	bps[i].y = (ascent-y)*scale;
     }
@@ -449,7 +455,8 @@ static SplineSet *slurpcompoundguts(FILE *fig,SplineChar *sc, SplineSet *sofar);
 static SplineSet * slurpcompound(FILE *fig,SplineChar *sc, SplineSet *sofar) {
     int ch;
 
-    fscanf(fig, "%*d %*d %*d %*d" );
+    if ( fscanf(fig, "%*d %*d %*d %*d") == EOF )
+        return sofar;
     while ((ch=getc(fig))!='\n' && ch!=EOF);
     sofar = slurpcompoundguts(fig,sc,sofar);
 return( sofar );
@@ -482,8 +489,10 @@ static SplineSet * slurparc(FILE *fig,SplineChar *sc, SplineSet *sofar) {
     real scale = sc->parent->ascent/(8.5*1200.0);
     real ascent = 11*1200*sc->parent->ascent/(sc->parent->ascent+sc->parent->descent);
 
-    fscanf(fig, "%d %*d %*d %*d %*d %*d %*d %*d %*f %*d %d %d %d %f %f %d %d %*d %*d %d %d",
-	    &sub, &dir, &fa, &ba, &cx, &cy, &_sx, &_sy, &_ex, &_ey );
+    if ( fscanf(fig, "%d %*d %*d %*d %*d %*d %*d %*d %*f %*d %d %d %d %f %f %d %d %*d %*d %d %d",
+                &sub, &dir, &fa, &ba, &cx, &cy, &_sx, &_sy, &_ex, &_ey) == EOF )
+        return sofar;
+
     while ((ch=getc(fig))!='\n' && ch!=EOF);
     /* I ignore arrow lines */
     if ( fa )
@@ -536,8 +545,10 @@ static SplineSet * slurpelipse(FILE *fig,SplineChar *sc, SplineSet *sofar) {
     real ascent = 11*1200*sf->ascent/(sf->ascent+sf->descent);
     /* I ignore the angle */
 
-    fscanf(fig, "%d %*d %*d %*d %*d %*d %*d %*d %*f %d %f %d %d %d %d %*d %*d %*d %*d",
-	    &sub, &dir, &angle, &cx, &cy, &rx, &ry );
+    if ( fscanf(fig, "%d %*d %*d %*d %*d %*d %*d %*d %*f %d %f %d %d %d %d %*d %*d %*d %*d",
+	        &sub, &dir, &angle, &cx, &cy, &rx, &ry) == EOF )
+        return sofar;
+
     while ((ch=getc(fig))!='\n' && ch!=EOF);
 
     dcx = cx*scale; dcy = (ascent-cy)*scale;
@@ -575,8 +586,10 @@ static SplineSet * slurppolyline(FILE *fig,SplineChar *sc, SplineSet *sofar) {
     SplinePoint *sp;
     int i;
 
-    fscanf(fig, "%d %*d %*d %*d %*d %*d %*d %*d %*f %*d %*d %d %d %d %d",
-	    &sub, &radius, &fa, &ba, &cnt );
+    if ( fscanf(fig, "%d %*d %*d %*d %*d %*d %*d %*d %*f %*d %*d %d %d %d %d",
+	        &sub, &radius, &fa, &ba, &cnt) < 5 )
+	return sofar;
+
     /* sub==1 => polyline, 2=>box, 3=>polygon, 4=>arc-box, 5=>imported eps bb */
     while ((ch=getc(fig))!='\n' && ch!=EOF);
     /* I ignore arrow lines */
@@ -585,6 +598,9 @@ static SplineSet * slurppolyline(FILE *fig,SplineChar *sc, SplineSet *sofar) {
     if ( ba )
 	while ((ch=getc(fig))!='\n' && ch!=EOF);
     bps = slurppoints(fig,sc->parent,cnt);
+    if ( bps == NULL )
+        return sofar;
+
     if ( sub==5 )		/* skip picture line */
 	while ((ch=getc(fig))!='\n' && ch!=EOF);
     else {
@@ -792,8 +808,10 @@ static SplineSet * slurpspline(FILE *fig,SplineChar *sc, SplineSet *sofar) {
     struct xspline xs;
     int i;
 
-    fscanf(fig, "%d %*d %*d %*d %*d %*d %*d %*d %*f %*d %d %d %d",
-	    &sub, &fa, &ba, &cnt );
+    if ( fscanf(fig, "%d %*d %*d %*d %*d %*d %*d %*d %*f %*d %d %d %d",
+                &sub, &fa, &ba, &cnt) < 4 )
+        return sofar;
+
     while ((ch=getc(fig))!='\n' && ch!=EOF);
     /* I ignore arrow lines */
     if ( fa )
@@ -802,14 +820,25 @@ static SplineSet * slurpspline(FILE *fig,SplineChar *sc, SplineSet *sofar) {
 	while ((ch=getc(fig))!='\n' && ch!=EOF);
     xs.n = cnt;
     xs.cp = slurppoints(fig,sc->parent,cnt);
+    if ( !xs.cp )
+        return sofar;
+
     xs.s = malloc((cnt+1)*sizeof(real));
     xs.closed = (sub&1);
     for ( i=0; i<cnt; ++i )
 #ifdef FONTFORGE_CONFIG_USE_DOUBLE
-	fscanf(fig,"%lf",&xs.s[i]);
+        if ( fscanf(fig,"%lf",&xs.s[i]) < 1 )
+            break;
 #else
-	fscanf(fig,"%f",&xs.s[i]);
+        if ( fscanf(fig,"%f",&xs.s[i]) < 1 )
+            break;
 #endif
+    if ( i<cnt ) {
+	free(xs.cp);
+	free(xs.s);
+	return sofar;
+    }
+            
     /* the spec says that the last point of a closed path will duplicate the */
     /* first, but it doesn't seem to */
     if ( xs.closed && ( !RealNear(xs.cp[cnt-1].x,xs.cp[0].x) ||
@@ -832,8 +861,7 @@ static SplineSet *slurpcompoundguts(FILE *fig,SplineChar *sc,SplineSet *sofar) {
     int ch;
 
     while ( 1 ) {
-	fscanf(fig,"%d",&oc);
-	if ( feof(fig) || oc==-6 )
+	if ( fscanf(fig,"%d",&oc) < 1 || feof(fig) || oc==-6 )
 return(sofar);
 	switch ( oc ) {
 	  case 6:
@@ -883,7 +911,11 @@ return;
     }
     /* skip the header, it isn't interesting */
     for ( i=0; i<8; ++i )
-	fgets(buffer,sizeof(buffer),fig);
+	if ( fgets(buffer,sizeof(buffer),fig) == NULL ) {
+	    fclose(fig);
+            ff_post_error(_("Read error"), _("Read error or premature end of file"));
+            return;
+        }
     spl = slurpcompoundguts(fig,sc,NULL);
     if ( spl!=NULL ) {
 	if ( layer==ly_grid )
