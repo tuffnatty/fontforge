@@ -2992,7 +2992,7 @@ static void ApplyAppleStateMachine(OTLookup *otl,struct lookup_data *data) {
     ASM *sm;
     int cnt_cur, cnt_mark;
     struct asm_state *entry;
-    int kern_stack[8], kcnt;		/* Kerning state machines handle at most 8 glyphs */
+    int kern_stack[8], depth = 0;	/* Kerning state machines handle at most 8 glyphs */
     /* Flaws: Line processing has not been done yet, so we are never in the */
     /*  start of line state and we never get an end of line token. We never */
     /*  get deleted tokens either, those glyphs are just gone */
@@ -3057,16 +3057,16 @@ static void ApplyAppleStateMachine(OTLookup *otl,struct lookup_data *data) {
 	      break;
 	      case kern_statemachine:
 		if ( entry->u.kern.kcnt!=0 ) {
-		    for ( i=0; i<kcnt && i<entry->u.kern.kcnt; ++i )
+		    for ( i=0; i<depth && i<entry->u.kern.kcnt; ++i )
 			data->str[kern_stack[i]].vr.h_adv_off +=
 				entry->u.kern.kerns[i];
-		    kcnt = 0;
+		    depth = 0;
 		}
 		if ( entry->flags & 0x8000 ) {
 		    for ( i=6; i>=0; --i )
 			kern_stack[i+1] = kern_stack[i];
 		    kern_stack[0] = pos;
-		    if ( ++kcnt>8 ) kcnt = 8;
+		    if ( ++depth>8 ) depth = 8;
 		}
 	      break;
 	      default:
