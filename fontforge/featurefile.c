@@ -574,8 +574,10 @@ static AnchorPoint *apfind_entry_exit(SplineFont *sf,OTLookup *otl, char *name,
     AnchorPoint *ap;
     SplineChar *sc = SFGetChar(sf,-1,name);
 
-    if ( sc==NULL )
-return( NULL );
+    if ( sc==NULL ) {
+        *_exit = NULL;
+        return( NULL );
+    }
     for ( ap = sc->anchor ; ap!=NULL; ap=ap->next ) {
 	if ( ap->anchor->subtable->lookup == otl ) {
 	    if ( ap->type == at_centry )
