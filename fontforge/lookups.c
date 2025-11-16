@@ -4636,7 +4636,7 @@ int KernClassFindIndexContaining( char **firsts_or_seconds,
 
 
 int KernClassContains(KernClass *kc, const char *name1, const char *name2, int ordered ) {
-    int infirst=0, insecond=0, scpos1, kwpos1, scpos2, kwpos2;
+    int infirst=0, insecond=0, scpos1=0, kwpos1=0, scpos2=0, kwpos2=0;
     int i;
 
     for ( i=1; i<kc->first_cnt; ++i ) {
