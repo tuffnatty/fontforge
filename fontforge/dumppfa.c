@@ -1462,7 +1462,7 @@ static int dumpprivatestuff(void (*dumpchar)(int ch,void *data), void *data,
     real bluevalues[14], otherblues[10];
     real snapcnt[12];
     real stemsnaph[12], stemsnapv[12];
-    real stdhw[1], stdvw[1];
+    real stdhw[1] = { 0 }, stdvw[1] = { 0 };
     int flex_max;
     int i;
     int hasblue=0, hash=0, hasv=0, hasshift/*, hasxuid*/, hasbold, haslg;
@@ -1520,8 +1520,6 @@ return( false );
     }
     bluescale = BlueScaleFigure(sf->private,bluevalues,otherblues);
 
-    if ( !hash || !hasv )
-    stdhw[0] = stdvw[0] = 0;
     if ( !hash ) {
 	FindHStems(sf,stemsnaph,snapcnt);
 	mi = -1;
