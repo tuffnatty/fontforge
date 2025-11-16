@@ -2013,9 +2013,7 @@ void FeatDumpFontLookups(FILE *out,SplineFont *sf) {
 
     SFFindUnusedLookups(sf);
 
-
-    locale_t tmplocale; locale_t oldlocale; // Declare temporary locale storage.
-    switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
+    WITH_C_LOCALE();
     untick_lookups(sf);
     preparenames(sf);
     gdef_markclasscheck(out,sf,NULL);
@@ -2024,7 +2022,7 @@ void FeatDumpFontLookups(FILE *out,SplineFont *sf) {
     dump_gdef(out,sf);
     dump_base(out,sf);
     cleanupnames(sf);
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+    END_WITH_C_LOCALE();
 }
 
 
@@ -7531,10 +7529,10 @@ void SFApplyFeatureFile(SplineFont *sf,FILE *file,char *filename,bool ignore_inv
     tok.ignore_invalid_replacement = ignore_invalid_replacement;
     CopySplineFontGroupsForFeatureFile(sf, &tok);
 
-    locale_t tmplocale; locale_t oldlocale; // Declare temporary locale storage.
-    switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
+    WITH_C_LOCALE();
     fea_ParseFeatureFile(&tok);
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+    END_WITH_C_LOCALE();
+
     if ( tok.err_count==0 ) {
 	tok.sofar = fea_reverseList(tok.sofar);
 	fea_ApplyFile(&tok, tok.sofar);

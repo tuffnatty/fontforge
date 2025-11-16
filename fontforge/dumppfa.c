@@ -2635,8 +2635,7 @@ int _WritePSFont(FILE *out,SplineFont *sf,enum fontformat format,int flags,
 	flags &= ~ps_flag_noflex;
 
     /* make sure that all reals get output with '.' for decimal points */
-    locale_t tmplocale; locale_t oldlocale; // Declare temporary locale storage.
-    switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
+    WITH_C_LOCALE();
     if ( (format==ff_mma || format==ff_mmb) && sf->mm!=NULL )
 	sf = sf->mm->normal;
     if ( format==ff_cid )
@@ -2646,7 +2645,7 @@ int _WritePSFont(FILE *out,SplineFont *sf,enum fontformat format,int flags,
 	if ( format==ff_ptype0 )
 	    dumptype0stuff(out,sf,map);
     }
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+    END_WITH_C_LOCALE();
     if ( ferror(out) || err)
 return( 0 );
 

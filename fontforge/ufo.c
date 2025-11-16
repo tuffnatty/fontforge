@@ -1938,9 +1938,7 @@ int WriteUFOFontFlex(const char *basedir, SplineFont *sf, enum fontformat ff, in
     /* Create it */
     if (GFileMkDir( basedir, 0755 ) == -1) return false;
 
-    locale_t tmplocale; locale_t oldlocale; // Declare temporary locale storage.
-    switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
-
+    WITH_C_LOCALE();
 
     err  = !UFOOutputMetaInfo(basedir,sf,version);
     err |= !UFOOutputFontInfo(basedir,sf,layer,version);
@@ -1951,7 +1949,7 @@ int WriteUFOFontFlex(const char *basedir, SplineFont *sf, enum fontformat ff, in
     err |= !UFOOutputFeatures(basedir,sf,version);
 
     if ( err ) {
-        switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+        EXIT_C_LOCALE();
         return false;
     }
 
@@ -1981,14 +1979,17 @@ int WriteUFOFontFlex(const char *basedir, SplineFont *sf, enum fontformat ff, in
     }
     glif_name_index_destroy(glif_name_hash); // Close the hash table.
 
+    END_WITH_C_LOCALE();
+
     struct glif_name_index * layer_name_hash = glif_name_index_new(); // Open the hash table.
     struct glif_name_index * layer_path_hash = glif_name_index_new(); // Open the hash table.
 
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
     xmlDocPtr plistdoc = PlistInit(); if (plistdoc == NULL) return false; // Make the document.
     xmlNodePtr rootnode = xmlDocGetRootElement(plistdoc); if (rootnode == NULL) { xmlFreeDoc(plistdoc); return false; } // Find the root node.
     xmlNodePtr arraynode = xmlNewChild(rootnode, NULL, BAD_CAST "array", NULL); if (arraynode == NULL) { xmlFreeDoc(plistdoc); return false; } // Make the dict.
-    switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
+
+    WITH_C_LOCALE();
+
     int layer_pos;
     for (layer_pos = (all_layers ? 0 : ly_fore); layer_pos < (all_layers ? sf->layer_cnt : ly_fore+1); layer_pos++) {
       // We don't want to emit the default background layer unless it has stuff in it or was in the input U. F. O..
@@ -2041,10 +2042,11 @@ int WriteUFOFontFlex(const char *basedir, SplineFont *sf, enum fontformat ff, in
     free(fname); fname = NULL;
     xmlFreeDoc(plistdoc); // Free the memory.
     xmlCleanupParser();
+
+    END_WITH_C_LOCALE();
+
     glif_name_index_destroy(layer_name_hash); // Close the hash table.
     glif_name_index_destroy(layer_path_hash); // Close the hash table.
-
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
     return !err;
 }
 
@@ -3812,8 +3814,9 @@ SplineFont *SFReadUFO(char *basedir, int flags) {
     temp = buildname(basedir,"fontinfo.plist");
     doc = xmlParseFile(temp);
     free(temp);
-    locale_t tmplocale; locale_t oldlocale; // Declare temporary locale storage.
-    switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
+
+    WITH_C_LOCALE();
+
     if ( doc!=NULL ) {
       plist = xmlDocGetRootElement(doc);
       dict = FindNode(plist->children,"dict");
@@ -4130,7 +4133,7 @@ SplineFont *SFReadUFO(char *basedir, int flags) {
 	char * layercontentsname = buildname(basedir,"layercontents.plist");
 	char ** layernames = NULL;
 	if (layercontentsname == NULL) {
-		switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+		EXIT_C_LOCALE();
 		return( NULL );
 	} else if ( GFileExists(layercontentsname)) {
 		xmlDocPtr layercontentsdoc = NULL;
@@ -4354,7 +4357,9 @@ SplineFont *SFReadUFO(char *basedir, int flags) {
 		xmlFreeDoc(doc);
     }
 #endif
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+
+    END_WITH_C_LOCALE();
+
 return( sf );
 }
 
@@ -4371,11 +4376,9 @@ SplineSet *SplinePointListInterpretGlif(SplineFont *sf,char *filename,char *memo
     if ( doc==NULL )
 return( NULL );
 
-    locale_t tmplocale; locale_t oldlocale; // Declare temporary locale storage.
-    switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
-    setlocale(LC_NUMERIC,"C");
+    WITH_C_LOCALE();
     sc = _UFOLoadGlyph(sf,doc,filename,NULL,NULL,ly_fore);
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+    END_WITH_C_LOCALE();
 
     if ( sc==NULL )
 return( NULL );

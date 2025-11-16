@@ -3115,8 +3115,7 @@ int SFDWrite(char *filename,SplineFont *sf,EncMap *map,EncMap *normal,int todir)
     if ( sfd==NULL )
 return( 0 );
 
-    locale_t tmplocale; locale_t oldlocale; // Declare temporary locale storage.
-    switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
+    WITH_C_LOCALE();
     if ( sf->cidmaster!=NULL ) {
 	sf=sf->cidmaster;
 	gc = 1;
@@ -3128,7 +3127,8 @@ return( 0 );
 	EncMapFree(map);
     } else
 	err = SFDDump(sfd,sf,map,normal,todir,filename);
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+    END_WITH_C_LOCALE();
+
     if ( ferror(sfd) ) err = true;
     if ( fclose(sfd) ) err = true;
     if ( todir )
@@ -9073,12 +9073,13 @@ static SplineFont *SFD_Read(char *filename,FILE *sfd, int fromdir) {
     }
     if ( sfd==NULL )
 return( NULL );
-    locale_t tmplocale; locale_t oldlocale; // Declare temporary locale storage.
-    switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
+
+    WITH_C_LOCALE();
     ff_progress_change_stages(2);
     if ( (version = SFDStartsCorrectly(sfd,tok))!=-1 )
 	sf = SFD_GetFont(sfd,NULL,tok,fromdir,filename,version);
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+    END_WITH_C_LOCALE();
+
     if ( sf!=NULL ) {
 	sf->filename = copy(filename);
 	if ( sf->mm!=NULL ) {
@@ -9135,8 +9136,8 @@ SplineChar *SFDReadOneChar(SplineFont *cur_sf,const char *name) {
 	sfd = fopen(cur_sf->filename,"r");
     if ( sfd==NULL )
 return( NULL );
-    locale_t tmplocale; locale_t oldlocale; // Declare temporary locale storage.
-    switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
+
+    WITH_C_LOCALE();
 
     memset(&sf,0,sizeof(sf));
     memset(&layers,0,sizeof(layers));
@@ -9213,7 +9214,8 @@ return( NULL );
 
     if ( sf.layers!=layers )
 	free(sf.layers);
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+
+    END_WITH_C_LOCALE();
 return( sc );
 }
 
@@ -9432,8 +9434,8 @@ SplineFont *SFRecoverFile(char *autosavename,int inquire,int *state) {
     if (!ask_about_file(autosavename, state, &asfd)) {
 return( NULL );
     }
-    locale_t tmplocale; locale_t oldlocale; // Declare temporary locale storage.
-    switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
+
+    WITH_C_LOCALE();
     ret = SlurpRecovery(asfd,tok,sizeof(tok));
     if ( ret==NULL ) {
 	const char *buts[3];
@@ -9441,7 +9443,8 @@ return( NULL );
 	if ( ff_ask(_("Recovery Failed"),(const char **) buts,0,1,_("Automagic recovery of changes to %.80s failed.\nShould FontForge try again to recover next time you start it?"),tok)==0 )
 	    unlink(autosavename);
     }
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+    END_WITH_C_LOCALE();
+
     fclose(asfd);
     if ( ret )
 	ret->autosavename = copy(autosavename);
@@ -9465,8 +9468,8 @@ return;
     for ( i=0; i<sf->subfontcnt; ++i )
 	if ( sf->subfonts[i]->glyphcnt>max ) max = sf->subfonts[i]->glyphcnt;
 
-    locale_t tmplocale; locale_t oldlocale; // Declare temporary locale storage.
-    switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
+    WITH_C_LOCALE();
+
     if ( !sf->new && sf->origname!=NULL )	/* might be a new file */
 	fprintf( asfd, "Base: %s%s\n", sf->origname,
 		sf->compression==0?"":compressors[sf->compression-1].ext );
@@ -9496,7 +9499,9 @@ return;
     fprintf( asfd, "EndChars\n" );
     fprintf( asfd, "EndSplineFont\n" );
     fclose(asfd);
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+
+    END_WITH_C_LOCALE();
+
     sf->changed_since_autosave = false;
 }
 
@@ -9530,8 +9535,8 @@ char **NamesReadSFD(char *filename) {
 
     if ( sfd==NULL )
 return( NULL );
-    locale_t tmplocale; locale_t oldlocale; // Declare temporary locale storage.
-    switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
+
+    WITH_C_LOCALE();
     if ( SFDStartsCorrectly(sfd,tok)!=-1 ) {
 	while ( !feof(sfd)) {
 	    if ( (eof = getname(sfd,tok))!=1 ) {
@@ -9549,7 +9554,8 @@ return( NULL );
 	    }
 	}
     }
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+    END_WITH_C_LOCALE();
+
     fclose(sfd);
 return( ret );
 }

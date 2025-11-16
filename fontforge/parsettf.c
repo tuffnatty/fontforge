@@ -5550,9 +5550,10 @@ static int readttf(FILE *ttf, struct ttfinfo *info, char *filename) {
     if ( !readttfheader(ttf,info) ) {
 return( 0 );
     }
+
     /* TrueType doesn't need this but opentype dictionaries do */
-    locale_t tmplocale; locale_t oldlocale; // Declare temporary locale storage.
-    switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
+    WITH_C_LOCALE();
+
     readttfpreglyph(ttf,info);
     ff_progress_change_total(info->glyph_cnt);
 
@@ -5573,7 +5574,7 @@ return( 0 );
 	buts[3] = NULL;
 	choice = ff_ask(_("Pick a font, any font..."),(const char **) buts,0,2,_("This font contains both a TrueType 'glyf' table and an OpenType 'CFF ' table. FontForge can only deal with one at a time, please pick which one you want to use"));
 	if ( choice==2 ) {
-          switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+          EXIT_C_LOCALE();
 return( 0 );
 	} else if ( choice==0 )
 	    info->cff_start=0;
@@ -5594,16 +5595,16 @@ return( 0 );
     } else if ( info->cff_start!=0 ) {
 	info->to_order2 = (loaded_fonts_same_as_new && new_fonts_are_order2);
 	if ( !readcffglyphs(ttf,info) ) {
-	    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+	    EXIT_C_LOCALE();
 return( 0 );
 	}
     } else if ( info->typ1_start!=0 ) {
 	if ( !readtyp1glyphs(ttf,info) ) {
-	    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+	    EXIT_C_LOCALE();
 return( 0 );
 	}
     } else {
-	switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+	EXIT_C_LOCALE();
 return( 0 );
     }
     if ( info->bitmapdata_start!=0 && info->bitmaploc_start!=0 )
@@ -5612,7 +5613,7 @@ return( 0 );
 	ff_post_error( _("No Bitmap Strikes"), _("No (useable) bitmap strikes in this TTF font: %s"), filename==NULL ? "<unknown>" : filename );
     if ( info->onlystrikes && info->bitmaps==NULL ) {
 	free(info->chars);
-	switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+	EXIT_C_LOCALE();
 return( 0 );
     }
     if ( info->hmetrics_start!=0 )
@@ -5688,7 +5689,9 @@ return( 0 );
 	tex_read(ttf,info);
     if ( info->math_start!=0 )
 	otf_read_math(ttf,info);
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+
+    END_WITH_C_LOCALE();
+
     if ( !info->onlystrikes && info->glyphlocations_start!=0 && info->glyph_start!=0 )
 	ttfFixupReferences(info);
     /* Can't fix up any postscript references until we create a SplineFont */

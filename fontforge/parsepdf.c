@@ -1294,8 +1294,7 @@ static void _InterpretPdf(FILE *in, struct pdfcontext *pc, EntityChar *ec) {
     char tokbuf[100];
     const int tokbufsize = 100;
 
-    locale_t tmplocale; locale_t oldlocale; // Declare temporary locale storage.
-    switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
+    WITH_C_LOCALE();
 
     transform[0] = transform[3] = 1.0;
     transform[1] = transform[2] = transform[4] = transform[5] = 0;
@@ -1615,7 +1614,8 @@ static void _InterpretPdf(FILE *in, struct pdfcontext *pc, EntityChar *ec) {
 	ec->splines = ent;
     }
     ECCategorizePoints(ec);
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+
+    END_WITH_C_LOCALE();
 }
 
 static SplineChar *pdf_InterpretSC(struct pdfcontext *pc,char *glyphname,
@@ -2060,8 +2060,8 @@ char **NamesReadPDF(char *filename) {
     int i;
     char **list;
 
-    locale_t tmplocale; locale_t oldlocale; // Declare temporary locale storage.
-    switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
+
+    WITH_C_LOCALE();
     memset(&pc,0,sizeof(pc));
     if ( (pc.pdf=fopen(filename,"r"))==NULL )
 	return( NULL );
@@ -2084,7 +2084,7 @@ char **NamesReadPDF(char *filename) {
     list[i]=NULL;
     fclose(pc.pdf);
     pcFree(&pc);
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+    EXIT_C_LOCALE();
     return( list );
 
 /* if errors, then free memory, close files, and return a NULL */
@@ -2094,7 +2094,7 @@ NamesReadPDFlist_error:
 NamesReadPDF_error:
     pcFree(&pc);
     fclose(pc.pdf);
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+    END_WITH_C_LOCALE();
     return( NULL );
 }
 
@@ -2104,27 +2104,26 @@ SplineFont *_SFReadPdfFont(FILE *pdf,char *filename, enum openflags openflags) {
     SplineFont *sf = NULL;
     int i;
 
-    locale_t tmplocale; locale_t oldlocale; // Declare temporary locale storage.
-    switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
+    WITH_C_LOCALE();
     memset(&pc,0,sizeof(pc));
     pc.pdf = pdf;
     pc.openflags = openflags;
     if ( (pc.objs = FindObjects(&pc))==NULL ) {
 	LogError( _("Doesn't look like a valid pdf file, couldn't find xref section") );
 	pcFree(&pc);
-	switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+	EXIT_C_LOCALE();
 return( NULL );
     }
     if ( pc.encrypted ) {
 	LogError( _("This pdf file contains an /Encrypt dictionary, and FontForge does not currently\nsupport pdf encryption" ));
 	pcFree(&pc);
-	switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+	EXIT_C_LOCALE();
 return( NULL );
     }
     if ( pdf_findfonts(&pc)==0 ) {
 	LogError( _("This pdf file has no fonts"));
 	pcFree(&pc);
-	switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+	EXIT_C_LOCALE();
 return( NULL );
     }
     // parse the chosen font name
@@ -2162,7 +2161,8 @@ return( NULL );
 	if ( choice!=-1 )
 	    sf = pdf_loadfont(&pc,choice);
     }
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+    END_WITH_C_LOCALE();
+
     pcFree(&pc);
     free(select_this_font);
 return( sf );
@@ -2188,27 +2188,26 @@ Entity *EntityInterpretPDFPage(FILE *pdf,int select_page) {
     char *ret;
     int choice;
 
-    locale_t tmplocale; locale_t oldlocale; // Declare temporary locale storage.
-    switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
     memset(&pc,0,sizeof(pc));
     pc.pdf = pdf;
     pc.openflags = 0;
+    WITH_C_LOCALE();
     if ( (pc.objs = FindObjects(&pc))==NULL ) {
 	LogError( _("Doesn't look like a valid pdf file, couldn't find xref section") );
 	pcFree(&pc);
-	switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+	EXIT_C_LOCALE();
 return( NULL );
     }
     if ( pc.encrypted ) {
 	LogError( _("This pdf file contains an /Encrypt dictionary, and FontForge does not currently\nsupport pdf encryption" ));
 	pcFree(&pc);
-	switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+	EXIT_C_LOCALE();
 return( NULL );
     }
     if ( pdf_findpages(&pc)==0 ) {
 	LogError( _("This pdf file has no pages"));
 	pcFree(&pc);
-	switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+	EXIT_C_LOCALE();
 return( NULL );
     }
     if ( pc.pcnt==1 ) {
@@ -2224,19 +2223,19 @@ return( NULL );
 	    ret = ff_ask_string(_("Pick a page"),"1",buffer);
 	    if ( ret==NULL ) {
 		pcFree(&pc);
-		switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+		EXIT_C_LOCALE();
 return( NULL );
 	    }
 	    choice = strtol(ret,NULL,10)-1;
 	    if ( choice<0 || choice>=pc.pcnt ) {
 		pcFree(&pc);
-		switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+		EXIT_C_LOCALE();
 return( NULL );
 	    }
 	}
 	ent = pdf_InterpretEntity(&pc,choice);
     }
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+    END_WITH_C_LOCALE();
     pcFree(&pc);
 return( ent );
 }

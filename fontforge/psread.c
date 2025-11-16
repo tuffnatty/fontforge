@@ -1307,8 +1307,7 @@ static void _InterpretPS(IO *wrapper, EntityChar *ec, RetStack *rs) {
 
     tokbuf = malloc(tokbufsize);
 
-    locale_t tmplocale; locale_t oldlocale; // Declare temporary locale storage.
-    switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
+    WITH_C_LOCALE();
 
     memset(&gb,'\0',sizeof(GrowBuf));
     memset(&dict,'\0',sizeof(dict));
@@ -2832,7 +2831,9 @@ static void _InterpretPS(IO *wrapper, EntityChar *ec, RetStack *rs) {
     ECCategorizePoints(ec);
     if ( ec->width == UNDEFINED_WIDTH )
 	ec->width = wrapper->advance_width;
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+
+    END_WITH_C_LOCALE();
+
     free(tokbuf);
 }
 

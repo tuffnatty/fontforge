@@ -1981,8 +1981,8 @@ int SFPrivateGuess(SplineFont *sf,int layer, struct psdict *private,char *name, 
     char buffer[211];
     int ret;
 
-    locale_t tmplocale; locale_t oldlocale; // Declare temporary locale storage.
-    switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
+    WITH_C_LOCALE();
+
     ret = true;
 
     if ( strcmp(name,"BlueValues")==0 || strcmp(name,"OtherBlues")==0 ) {
@@ -2038,7 +2038,7 @@ int SFPrivateGuess(SplineFont *sf,int layer, struct psdict *private,char *name, 
     } else
 	ret = false;
 
-    switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
+    END_WITH_C_LOCALE();
 return( ret );
 }
 

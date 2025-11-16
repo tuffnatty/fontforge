@@ -2024,16 +2024,8 @@ static inline void freelocale_hack(locale_t dataset) {
 #endif
 }
 
-#if 0
-#define DECLARE_TEMP_LOCALE() char oldloc[25];
-#define SWITCH_TO_C_LOCALE() strncpy( oldloc,setlocale(LC_NUMERIC,NULL),24 ); oldloc[24]='\0'; setlocale(LC_NUMERIC,"C");
-#define SWITCH_TO_OLD_LOCALE() setlocale(LC_NUMERIC,oldloc);
-#else
-#define DECLARE_TEMP_LOCALE() locale_t tmplocale; locale_t oldlocale; // Declare temporary locale storage.
-#define SWITCH_TO_C_LOCALE() switch_to_c_locale(&tmplocale, &oldlocale); // Switch to the C locale temporarily and cache the old locale.
-#define SWITCH_TO_OLD_LOCALE() switch_to_old_locale(&tmplocale, &oldlocale); // Switch to the cached locale.
-#endif
-
-
+#define WITH_C_LOCALE() { locale_t tmplocale, oldlocale = NULL; switch_to_c_locale(&tmplocale, &oldlocale)
+#define EXIT_C_LOCALE() switch_to_old_locale(&tmplocale, &oldlocale)  // for use in early scope exit contexts
+#define END_WITH_C_LOCALE() EXIT_C_LOCALE(); }
 
 #endif /* FONTFORGE_SPLINEFONT_H */
