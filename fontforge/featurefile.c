@@ -3067,7 +3067,8 @@ static char* fea_AddGlyphNameRange(struct parseState* tok, char* glyph_from, cha
                                    char** _glyphs, int* _max, int* _cnt) {
     char* contents = NULL;
     int range_type = 0, range_len;
-    char* pt1, * start1, * pt2, * start2;
+    char* pt1, * start1, * pt2;
+    char* start2 = NULL;
     int v1, v2;
 
     assert(tok->type == tk_name);
@@ -7406,7 +7407,9 @@ static void fea_NameLookups(struct parseState *tok) {
             /* merge acs, only one ap mark and one ap base per ac per glyph */
             int gid;
             SplineChar *sc;
-            AnchorPoint *newapb, *newapbprev, *newapm, *newapmprev, *oldapb, *oldapm, *ap, *lastap;
+            AnchorPoint *newapb, *newapm, *oldapb, *oldapm, *ap, *lastap;
+	    AnchorPoint *newapbprev = NULL,
+			*newapmprev = NULL;
             for ( gid=0; gid<sf->glyphcnt; ++gid ) {
                 newapb = NULL;
                 newapm = NULL;
