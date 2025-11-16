@@ -49,7 +49,7 @@
 
 // Like strncpy() but always NUL-terminates
 #define strtcpy(to, from, size) do {	\
-	char *from_ = (from);	\
+	const char *from_ = (from);	\
 	int size_ = (size);	\
 	int len_ = strnlen(from_, size_);	\
 	*(char *)mempcpy((to), from_, len_ - (len_ == size_)) = 0;	\
