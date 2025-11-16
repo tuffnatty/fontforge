@@ -3823,7 +3823,8 @@ SplineFont *SFReadUFO(char *basedir, int flags) {
       if ( xmlStrcmp(plist->name,(const xmlChar *) "plist")!=0 || dict==NULL ) {
 	LogError(_("Expected property list file"));
 	xmlFreeDoc(doc);
-      return( NULL );
+	EXIT_C_LOCALE();
+        return( NULL );
       }
       for ( keys=dict->children; keys!=NULL; keys=keys->next ) {
 	for ( value = keys->next; value!=NULL && xmlStrcmp(value->name,(const xmlChar *) "text")==0;

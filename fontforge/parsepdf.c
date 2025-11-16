@@ -2060,11 +2060,11 @@ char **NamesReadPDF(char *filename) {
     int i;
     char **list;
 
-
-    WITH_C_LOCALE();
     memset(&pc,0,sizeof(pc));
     if ( (pc.pdf=fopen(filename,"r"))==NULL )
 	return( NULL );
+
+    WITH_C_LOCALE();
     if ( (pc.objs=FindObjects(&pc))==NULL ) {
 	LogError( _("Doesn't look like a valid pdf file, couldn't find xref section") );
 	goto NamesReadPDF_error;
