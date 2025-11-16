@@ -767,9 +767,9 @@ static SplineSet *ApproximateXSpline(struct xspline *xs,int order2) {
 	if ( i==(size_t)(xs->n-2) && xs->closed )
 	    sp = spl->first;
 	else {
-	    sp->pointtype = ( xs->s[i+1]==0 )?pt_corner:pt_curve;
 	    xsplineeval(&tbp,i+1,xs);
 	    sp = SplinePointCreate(tbp.x, tbp.y);
+	    sp->pointtype = ( xs->s[i+1]==0 )?pt_corner:pt_curve;
 	}
 	for ( j=0, t=1./8; j<sizeof(mids)/sizeof(mids[0]); ++j, t+=1./8 ) {
 	    xsplineeval((BasePoint *) &mids[j].p,i+t,xs);
