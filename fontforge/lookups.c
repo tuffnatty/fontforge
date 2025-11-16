@@ -1630,7 +1630,7 @@ return;
 }
 
 char *TagFullName(SplineFont *sf,uint32_t tag, int ismac, int onlyifknown) {
-    char ubuf[200], *end = ubuf+sizeof(ubuf), *setname;
+    char ubuf[200], *setname;
     int k;
 
     if ( ismac==-1 )
@@ -1663,7 +1663,7 @@ char *TagFullName(SplineFont *sf,uint32_t tag, int ismac, int onlyifknown) {
 	    ubuf[5] = '\'';
 	    ubuf[6] = ' ';
 	    if ( friendlies[k].tag!=0 )
-		strncpy(ubuf+7, (char *) friendlies[k].friendlyname,end-ubuf-7);
+		strtcpy(ubuf + 7, friendlies[k].friendlyname, sizeof(ubuf) - 7);
 	    else if ( onlyifknown )
 return( NULL );
 	    else
