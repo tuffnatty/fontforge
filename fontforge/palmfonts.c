@@ -358,8 +358,7 @@ return( NULL );
     file_end = ftell(file);
     fseek(file,0,SEEK_SET);
 
-    fread(name,1,32,file);
-    if ( ferror(file) )
+    if ( fread(name,1,32,file) < 32 || ferror(file) )
   goto fail;
     name[32]=0;
     fseek(file,0x2c,SEEK_CUR);		/* Find start of record list */
