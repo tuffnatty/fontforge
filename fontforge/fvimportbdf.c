@@ -2229,7 +2229,9 @@ return( NULL );
 	free(temp);
     } else if ( i!=-1 ) {
 	sprintf( buf, "%s %s", compressors[i].recomp, filename );
-	system(buf);
+	if ( system(buf)!=0 )
+            /* Yes, it's an error condition, but we already have a return value */
+            ff_post_error(_("Recompress failed!"),_("Recompress failed!"));
     }
 return( ret );
 }
