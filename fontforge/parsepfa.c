@@ -2112,13 +2112,14 @@ return( 0 );
     temptok[0] = '\0';
     while ( (ch=getc(temp))!=EOF ) {
 	if ( pt>=end ) {
-	    char *old = buffer;
+            int pt_offset = pt - buffer;
+	    int binstart_offset = binstart - buffer;
 	    int len = (end-buffer)+2000;
 	    buffer = realloc(buffer,len);
 	    end = buffer+len;
-	    pt = buffer+(pt-old);
+	    pt = buffer+pt_offset;
 	    if ( binstart!=NULL )
-		binstart = buffer+(binstart-old);
+		binstart = buffer+binstart_offset;
 	}
 	*pt++ = ch;
 	isminus = ch=='-' && wasspace;
