@@ -1002,14 +1002,21 @@ return( NULL );
 	    ret_old=ret; gen_old=gen; sub_old=pc->subindex;
 	    pc->ocnt=(int)(start+num);
 	    ret = realloc(ret,(start+num+1)*sizeof(long));
-	    pc->subindex = realloc(pc->subindex,(start+num+1)*sizeof(long));
-	    gen = realloc(gen,(start+num)*sizeof(int));
-	    if ( ret==NULL || gen==NULL || pc->subindex==NULL || pc->ocnt!=start+num ) {
-		if ( ret==NULL ) ret=ret_old;
-		if ( pc->subindex==NULL ) pc->subindex=sub_old;
-		if ( gen==NULL ) gen=gen_old;
+	    if ( ret == NULL ) {
+                ret = ret_old;
+FindObjectsFromXREFObjectError_out_of_memory:
 		NoMoreMemMessage();
 		goto FindObjectsFromXREFObjectError_ReleaseMemAndExit;
+	    }
+	    pc->subindex = realloc(pc->subindex,(start+num+1)*sizeof(long));
+            if ( pc->subindex==NULL ) {
+                pc->subindex = sub_old;
+		goto FindObjectsFromXREFObjectError_out_of_memory;
+	    }
+	    gen = realloc(gen,(start+num)*sizeof(int));
+            if ( gen == NULL ) {
+                gen = gen_old;
+		goto FindObjectsFromXREFObjectError_out_of_memory;
 	    }
 	    memset(ret+cnt,-1,sizeof(long)*(start+num-cnt));
 	    memset(pc->subindex+cnt,-1,sizeof(long)*(start+num-cnt));
