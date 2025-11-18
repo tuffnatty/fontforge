@@ -156,7 +156,8 @@ static int seektrailer(FILE *pdf, long *start, long *num, struct pdfcontext *pc)
 	if ( fseek(pdf,pos,SEEK_SET)!=0 ) return( false );
 	if ( findkeyword(pdf,"/Root",">>") ) {
 	    long bar;
-	    fscanf(pdf,"%d %ld",&pc->root,&bar);
+	    if ( fscanf(pdf,"%d %ld",&pc->root,&bar) < 2 )
+                return( false );
 	}
     }
 
@@ -435,8 +436,8 @@ return( true );
 }
 
 static void pdf_skipobjectheader(struct pdfcontext *pc) {
-
-    fscanf( pc->pdf, "%*d %*d obj" );
+    // This function does not handle errors by design
+    int UNUSED(result) = fscanf( pc->pdf, "%*d %*d obj" );
 }
 
 static int hex(int ch1, int ch2) {
@@ -535,7 +536,8 @@ return( false );
 return( false );
 	    rewind(data);
 	    for ( i=0; i<n; ++i ) {
-		fscanf( data, "%d %d", &o, &offset );
+                if ( fscanf( data, "%d %d", &o, &offset ) < 2 )
+                    return( false );
 		if ( o==num )
 	    break;
 	    }
@@ -986,7 +988,7 @@ return( NULL );
 		pc->encrypted = true;
 	}
 	if ( pc->root == 0 && (pt=PSDictHasEntry(&pc->pdfdict,"Root"))!=NULL ) {
-	    fscanf( pdf, "%d %d", &pc->root, &bar );
+	    bar = fscanf( pdf, "%d %d", &pc->root, &bar );
 	}
 	prev_xref = -1;
 	if ( (pt=PSDictHasEntry(&pc->pdfdict,"Prev"))!=NULL ) {
