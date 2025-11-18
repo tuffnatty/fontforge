@@ -613,7 +613,7 @@ int WritePalmBitmaps(const char *filename,SplineFont *sf, int32_t *sizes,EncMap 
     struct FontTag fn;
     uint16_t *images[4];
     int *offsets, *widths;
-    int owbase, owpos, font_start, density_starts;
+    int owbase, owpos, font_start, density_starts = 0;
     FILE *file;
     int fontcnt, fonttype;
     int notdefpos = -1;
