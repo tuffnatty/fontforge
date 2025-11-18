@@ -611,8 +611,12 @@ return( NULL );
     hlen = getushort(file);		/* Length of font header */
     ilen = getushort(file);		/* Length of name section */
     getushort(file);			/* Number on URW list */
-    fread(fnam,1,12,file);		/* 6 words of filename */
-    fread(fullname,1,80,file);		/* 40 words of fontname (human readable) */
+    if ( fread(fnam,1,12,file)<12 ||	/* 6 words of filename */
+         fread(fullname,1,80,file)<80 )	/* 40 words of fontname (human readable) */
+    {
+	fclose(file);
+        return( NULL );
+    }
     fnam[12] = fullname[80] = '\0';
     ch1 = getc(file);
     ch2 = getc(file);
