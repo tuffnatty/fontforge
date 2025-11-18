@@ -875,7 +875,7 @@ void FVPointOfView(FontViewBase *fv,struct pov_data *pov) {
 	if ( (gid = fv->map->map[i])!=-1 && fv->selected[i] &&
 		(sc = fv->sf->glyphs[gid])!=NULL && !sc->ticked ) {
 	    sc->ticked = true;
-	    SCPreserveLayer(sc,layer,false);
+	    SCPreserveLayer(sc,fv->active_layer,false);
 
 	    origin.x = origin.y = 0;
 	    if ( pov->xorigin==or_center || pov->yorigin==or_center )
