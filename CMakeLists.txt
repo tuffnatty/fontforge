@@ -126,6 +126,10 @@ endif()
 
 # Requirements for options
 if(ENABLE_GUI)
+  if(APPLE)
+    # Prevent a version mismatch when png.h is found in Mono.framework
+    set(CMAKE_FIND_FRAMEWORK LAST)
+  endif()
   find_package(GDK3 3.10 REQUIRED)
   find_package(PkgConfig)
   pkg_check_modules(GTK3 REQUIRED IMPORTED_TARGET gtk+-3.0)
