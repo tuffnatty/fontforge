@@ -940,7 +940,7 @@ struct sflistlist {
 };
 
 static struct sflistlist *FondSplitter(struct sflist *sfs,int *fondcnt) {
-    struct sflist *psfaces[48], *sfi, *last, *start;
+    struct sflist *psfaces[48], *sfi, *last=NULL, *start;
     struct sflistlist *sfsl=NULL, *lastl=NULL, *cur, *test;
     uint16_t psstyle;
     int fc = 0;
@@ -949,7 +949,6 @@ static struct sflistlist *FondSplitter(struct sflist *sfs,int *fondcnt) {
     if ( sfi->sf->fondname==NULL ) {
 	memset(psfaces,0,sizeof(psfaces));
 	MacStyleCode(sfi->sf,&psstyle);
-	last = NULL;
 	while ( sfi->sf->fondname==NULL && psfaces[psstyle]==NULL ) {
 	    psfaces[psstyle] = sfi;
 	    last = sfi;
@@ -1555,7 +1554,7 @@ static void WriteDummyDFontHeaders(FILE *res) {
 	/* MacBinary limits the name to 63 characters, I dunno what happens if */
 	/*  we excede that */
 static void MakeMacPSName(char buffer[63],SplineFont *sf) {
-    char *pt, *spt, *lcpt;
+    char *pt, *spt, *lcpt = NULL;
 
     for ( pt = buffer, spt = sf->fontname; *spt && pt<buffer+63-1; ++spt ) {
 	if ( isupper(*spt) || spt==sf->fontname ) {
