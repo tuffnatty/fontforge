@@ -297,29 +297,41 @@ static void AddBDFChar(FILE *bdf, SplineFont *sf, BDFFont *b,EncMap *map,int dep
     gettoken(bdf,name,sizeof(tok));
     while ( gettoken(bdf,tok,sizeof(tok))!=-1 ) {
 	if ( strcmp(tok,"ENCODING")==0 ) {
-	    fscanf(bdf,"%d",&enc);
+            if ( fscanf(bdf,"%d",&enc) < 1 ) {
+AddBDFChar_abort:
+                LogError( _("Premature end of file while reading %s."), name );
+                return;
+            }
+
 	    /* Adobe says that enc is value for Adobe Standard */
 	    /* But people don't use it that way. Adobe also says that if */
 	    /* there is no mapping in adobe standard the -1 may be followed */
 	    /* by another value, the local encoding. */
 	    if ( enc==-1 ) {
 		ch = getc(bdf);
-		if ( ch==' ' || ch=='\t' )
-		    fscanf(bdf,"%d",&enc);
+		if ( ch==' ' || ch=='\t' ) {
+                    if ( fscanf(bdf,"%d",&enc) < 1 )
+                        goto AddBDFChar_abort;
+		}
 		else
 		    ungetc(ch,bdf);
 	    }
 	    if ( enc<-1 ) enc = -1;
-	} else if ( strcmp(tok,"DWIDTH")==0 )
-	    fscanf(bdf,"%d %*d",&width);
-	else if ( strcmp(tok,"DWIDTH1")==0 )
-	    fscanf(bdf,"%d %*d",&vwidth);
-	else if ( strcmp(tok,"SWIDTH")==0 )
-	    fscanf(bdf,"%d %*d",&swidth);
-	else if ( strcmp(tok,"SWIDTH1")==0 )
-	    fscanf(bdf,"%d %*d",&swidth1);
-	else if ( strcmp(tok,"BBX")==0 ) {
-	    fscanf(bdf,"%d %d %d %d",&hsz, &vsz, &xmin, &ymin );
+	} else if ( strcmp(tok,"DWIDTH")==0 ) {
+	    if ( fscanf(bdf,"%d %*d",&width) < 1 )
+                goto AddBDFChar_abort;
+	} else if ( strcmp(tok,"DWIDTH1")==0 ) {
+	    if ( fscanf(bdf,"%d %*d",&vwidth) < 1 )
+                goto AddBDFChar_abort;
+	} else if ( strcmp(tok,"SWIDTH")==0 ) {
+	    if ( fscanf(bdf,"%d %*d",&swidth) < 1 )
+                goto AddBDFChar_abort;
+	} else if ( strcmp(tok,"SWIDTH1")==0 ) {
+	    if ( fscanf(bdf,"%d %*d",&swidth1) < 1 )
+                goto AddBDFChar_abort;
+	} else if ( strcmp(tok,"BBX")==0 ) {
+	    if ( fscanf(bdf,"%d %d %d %d",&hsz, &vsz, &xmin, &ymin ) < 4 )
+                goto AddBDFChar_abort;
 	    xmax = hsz+xmin-1;
 	    ymax = vsz+ymin-1;
 	} else if ( strcmp(tok,"BITMAP")==0 )
@@ -519,14 +531,16 @@ static int slurp_header(FILE *bdf, int *_as, int *_ds, Encoding **_enc,
     while ( gettoken(bdf,tok,sizeof(tok))!=-1 ) {
 	if ( strcmp(tok,"CHARS")==0 ) {
 	    cnt=0;
-	    fscanf(bdf,"%d",&cnt);
+            if ( fscanf(bdf,"%d",&cnt) < 1 )
+                return -2;
 	    ff_progress_change_total(cnt);
     break;
 	}
 	if ( strcmp(tok,"STARTPROPERTIES")==0 ) {
 	    int cnt;
 	    inprops = true;
-	    fscanf(bdf, "%d", &cnt );
+            if ( fscanf(bdf, "%d", &cnt ) < 1 )
+                return -2;
 	    if ( pcnt+cnt>=pmax )
 		dummy->props = realloc(dummy->props,(pmax=pcnt+cnt)*sizeof(BDFProperties));
 	    /* But it isn't a property itself */
@@ -535,7 +549,8 @@ static int slurp_header(FILE *bdf, int *_as, int *_ds, Encoding **_enc,
 	    inprops = false;
     continue;
 	}
-	fgets(buffer,sizeof(buffer),bdf );
+        if ( fgets(buffer,sizeof(buffer),bdf) == NULL )
+            return -2;
 	buf = buffer;
 	{
 	    int val;
@@ -1472,7 +1487,12 @@ return(-2);
     strl = getformint32(file,format);
     strs = malloc(strl+1);
     strs[strl]=0;
-    fread(strs,1,strl,file);
+    if ( fread(strs,1,strl,file) < strl ) {
+        free(strs);
+        free(props);
+        return( -2 );
+    }
+
     for ( i=0; i<cnt; ++i ) {
 	props[i].name = strs+props[i].name_offset;
 	if ( props[i].isStr )
@@ -1679,7 +1699,11 @@ return( false );
 	bitmapSizes[i] = getformint32(file, format);
     sizebitmaps = bitmapSizes[PCF_GLYPH_PAD_INDEX(format)];
     bitmap = malloc(sizebitmaps==0 ? 1 : sizebitmaps );
-    fread(bitmap,1,sizebitmaps,file);
+    if ( fread(bitmap,1,sizebitmaps,file) < sizebitmaps ) {
+        free(bitmap);
+	free(offsets);
+	return( false );
+    }
     if (PCF_BIT_ORDER(format) != MSBFirst )
 	BitOrderInvert(bitmap,sizebitmaps);
     if ( PCF_SCAN_UNIT(format)==1 )
@@ -1716,7 +1740,7 @@ return( false );
 return( true );
 }
 
-static void PcfReadEncodingsNames(FILE *file,struct toc *toc,SplineFont *sf,
+static bool PcfReadEncodingsNames(FILE *file,struct toc *toc,SplineFont *sf,
 	EncMap *map, BDFFont *b, Encoding *encname) {
     int format, cnt, i, stringsize;
     int *offsets=NULL;
@@ -1734,7 +1758,12 @@ static void PcfReadEncodingsNames(FILE *file,struct toc *toc,SplineFont *sf,
 	    offsets[i] = getformint32(file,format);
 	stringsize = getformint32(file,format);
 	string = malloc(stringsize);
-	fread(string,1,stringsize,file);
+        if ( fread(string,1,stringsize,file) < stringsize ) {
+            free(string);
+	    free(offsets);
+	    free(encs);
+	    return( false );
+        }
     }
     if ( pcfSeekToType(file,toc,PCF_BDF_ENCODINGS) &&
 	    ((format = getint32(file))&PCF_FORMAT_MASK)==PCF_DEFAULT_FORMAT ) {
@@ -1768,6 +1797,7 @@ static void PcfReadEncodingsNames(FILE *file,struct toc *toc,SplineFont *sf,
 	}
     }
     free(string); free(offsets); free(encs);
+    return( true );
 }
 
 static int PcfReadSWidths(FILE *file,struct toc *toc,BDFFont *b) {
@@ -1828,7 +1858,8 @@ return( false );
 
     if ( !PcfReadBitmaps(file,toc,b))
 return( false );
-    PcfReadEncodingsNames(file,toc,sf,map,b,encname);
+    if ( !PcfReadEncodingsNames(file,toc,sf,map,b,encname) )
+        return( false );
     if ( sf->onlybitmaps )
 	PcfReadSWidths(file,toc,b);
     new = calloc(sf->glyphcnt,sizeof(BDFChar *));
@@ -2086,6 +2117,11 @@ return( NULL );
 	while ( (ch=getc(bdf))!='\n' && ch!='\r' && ch!=EOF );
 	pixelsize = slurp_header(bdf,&ascent,&descent,&enc,family,mods,full,
 		&depth,foundry,fontname,comments,&defs,(int*)&upos,(int*)&uwidth,&dummy,filename);
+        if ( pixelsize==-2 ) {
+            fclose(bdf);
+	    ff_post_error(_("Not a bdf file"), _("Unexpected end of file in %.200s"), filename );
+	    return( NULL );
+	}
 	if ( defs.dwidth == 0 ) defs.dwidth = pixelsize;
 	if ( defs.dwidth1 == 0 ) defs.dwidth1 = pixelsize;
     }
