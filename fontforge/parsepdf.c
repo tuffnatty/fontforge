@@ -1283,7 +1283,7 @@ static void _InterpretPdf(FILE *in, struct pdfcontext *pc, EntityChar *ec) {
     BasePoint current;
     int tok, i, j;
     struct psstack stack[100];
-    real dval;
+    real dval = 0.0;
     int sp=0;
     SplinePoint *pt;
     real transform[6], t[6];
