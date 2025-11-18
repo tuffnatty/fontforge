@@ -1981,6 +1981,7 @@ static SplineFont *SearchPostScriptResources(FILE *f,long rlistpos,int subcnt,lo
     pfb = GFileTmpfile();
     if ( pfb==NULL ) {
 	LogError( _("Can't open temporary file for postscript output") );
+SearchPostScriptResources_fail:
 	fseek(f,here,SEEK_SET );
 	free(offsets);
 	free(rsrcids);
@@ -2041,7 +2042,10 @@ return(NULL);
 		exit( 1 );
 	    }
 	}
-	fread(buffer,1,rlen,f);
+	if ( fread(buffer,1,rlen,f) < rlen ) {
+            LogError( _("Premature end of file while reading POST resource") );
+	    goto SearchPostScriptResources_fail;
+	}
 	fwrite(buffer,1,rlen,pfb);
     }
     free(buffer);
@@ -2308,7 +2312,12 @@ static FOND *BuildFondList(FILE *f,long rlistpos,int subcnt,long rdata_pos,
 	if ( rname!=-1 ) {
 	    fseek(f,name_list+rname,SEEK_SET);
 	    ch1 = getc(f);
-	    fread(name,1,ch1,f);
+	    if ( ch1 == EOF || fread(name,1,ch1,f) < ch1 ) {
+               // Premature EOF. Truncate the list.
+               head = head->next;
+	       free(cur);
+	       break;
+	    }
 	    name[ch1] = '\0';
 	    cur->fondname = copy(name);
 	}
@@ -2969,7 +2978,8 @@ return( NULL );
 /* Look for a bare truetype font in a binhex/macbinary wrapper */
     if ( dlen!=0 && rlen<=dlen) {
 	int pos = ftell(f);
-	fread(header,1,4,f);
+	if ( fread(header,1,4,f) < 4 )
+            return( NULL );
 	header[5] = '\0';
 	if ( strcmp((char *) header,"OTTO")==0 || strcmp((char *) header,"true")==0 ||
 		strcmp((char *) header,"ttcf")==0 ||
@@ -3024,6 +3034,7 @@ return( NULL );
     continue;
 	for ( pt=sixbit; *pt!=ch && *pt!='\0'; ++pt );
 	if ( *pt=='\0' ) {
+IsResourceInHex_fail:
 	    fclose(binary);
 return( NULL );
 	}
@@ -3055,17 +3066,16 @@ return( NULL );
     /* skip name */
     for ( i=0; i<ch; ++i )
 	getc(binary);
-    if ( getc(binary)!='\0' ) {
-	fclose(binary);
-return( NULL );
-    }
-    fread(header,1,20,binary);
+    if ( getc(binary)!='\0' ||
+         fread(header,1,20,binary) < 20 )
+	goto IsResourceInHex_fail;
     dlen = (header[10]<<24)|(header[11]<<16)|(header[12]<<8)|header[13];
     rlen = (header[14]<<24)|(header[15]<<16)|(header[16]<<8)|header[17];
 /* Look for a bare truetype font in a binhex/macbinary wrapper */
     if ( dlen!=0 && rlen<dlen ) {
 	int pos = ftell(binary);
-	fread(header,1,4,binary);
+	if ( fread(header,1,4,binary) < 4 )
+            goto IsResourceInHex_fail;
 	header[5] = '\0';
 	if ( strcmp((char *) header,"OTTO")==0 || strcmp((char *) header,"true")==0 ||
 		strcmp((char *) header,"ttcf")==0 ||
@@ -3075,10 +3085,8 @@ return( NULL );
 return( ret );
 	}
     }
-    if ( rlen==0 ) {
-	fclose(binary);
-return( NULL );
-    }
+    if ( rlen==0 )
+        goto IsResourceInHex_fail;
 
     ret = IsResourceFork(binary,ftell(binary)+dlen+2,filename,flags,openflags,into,map);
 
