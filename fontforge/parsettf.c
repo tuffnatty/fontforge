@@ -2277,7 +2277,7 @@ static void readttfglyphs(FILE *ttf,struct ttfinfo *info) {
 	    goffsets[i] = 2*getushort(ttf);
     }
 
-    info->chars = calloc(info->glyph_cnt,sizeof(SplineChar *));
+    info->chars = calloc((unsigned)info->glyph_cnt,sizeof(SplineChar *));
     if ( !info->is_ttc || (info->openflags&of_all_glyphs_in_ttc)) {
 	/* read all the glyphs */
 	for ( i=0; i<info->glyph_cnt ; ++i ) {
@@ -5909,7 +5909,7 @@ static void MMFillFromVAR(SplineFont *sf, struct ttfinfo *info) {
     for ( i=0; i<v->tuple_count; ++i ) for ( j=0; j<v->axis_count; ++j )
 	mm->positions[i*v->axis_count+j] = v->tuples[i].coords[j];
     mm->defweights = calloc(v->tuple_count,sizeof(real));	/* Doesn't apply */
-    mm->axismaps = calloc(v->axis_count,sizeof(struct axismap));
+    mm->axismaps = calloc((unsigned)v->axis_count,sizeof(struct axismap));
     for ( i=0; i<v->axis_count; ++i ) {
 	mm->axes[i] = AxisNameConvert(v->axes[i].tag);
 	mm->axismaps[i].min = v->axes[i].min;
