@@ -37,6 +37,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 
+if(APPLE)
+  # Prevent a version mismatch when png.h is found in Mono.framework but libpng.dylib in Homebrew
+  set(CMAKE_FIND_FRAMEWORK LAST)
+endif()
+
 set_default_build_type(RelWithDebInfo) # Sets CMAKE_BUILD_TYPE
 set_default_rpath()
 add_uninstall_target()
@@ -126,10 +131,6 @@ endif()
 
 # Requirements for options
 if(ENABLE_GUI)
-  if(APPLE)
-    # Prevent a version mismatch when png.h is found in Mono.framework
-    set(CMAKE_FIND_FRAMEWORK LAST)
-  endif()
   find_package(GDK3 3.10 REQUIRED)
   find_package(PkgConfig)
   pkg_check_modules(GTK3 REQUIRED IMPORTED_TARGET gtk+-3.0)
