@@ -1416,7 +1416,7 @@ return( strcmp(sc1->name,sc2->name)==0 );
 
 static KernPair *InterpKerns(KernPair *kp1, KernPair *kp2, real amount,
 	SplineFont *new, SplineChar *scnew) {
-    KernPair *head=NULL, *last, *nkp, *k;
+    KernPair *head=NULL, *last=NULL, *nkp, *k;
 
     if ( kp1==NULL || kp2==NULL )
 return( NULL );
