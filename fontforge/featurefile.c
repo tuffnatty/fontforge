@@ -3066,7 +3066,7 @@ static char* fea_AddGlyphCIDRange(struct parseState* tok, int last_val, char** _
 static char* fea_AddGlyphNameRange(struct parseState* tok, char* glyph_from, char* glyph_to,
                                    char** _glyphs, int* _max, int* _cnt) {
     char* contents = NULL;
-    int range_type = 0, range_len;
+    int range_type = 0, range_len = 0;
     char* pt1, * start1, * pt2;
     char* start2 = NULL;
     int v1, v2;
