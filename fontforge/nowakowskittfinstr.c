@@ -2842,7 +2842,7 @@ return;
 
 static void optimize_strongpts_step2(InstrCt *ct) {
     int pass, i, j, forward;
-    int next_closed, prev_closed;
+    int next_closed = false, prev_closed = false;
     int next_pt_max, next_pt_min, prev_pt_max, prev_pt_min;
     int next_coord_max, next_coord_min, prev_coord_max, prev_coord_min;
     int *others = ct->edge.others;
