@@ -4377,7 +4377,7 @@ static void ApplyVariationSequenceSubtable(FILE *ttf,uint32_t vs_map,
 		int cnt = getc(ttf);
 		int uni;
 		for ( uni=start_uni; uni<=start_uni+cnt; ++uni ) {
-		    SplineChar *sc;
+		    SplineChar *sc = NULL;
 		    struct altuni *altuni;
 		    for ( gid = 0; gid<info->glyph_cnt; ++gid ) {
 			if ( (sc = info->chars[gid])!=NULL ) {
