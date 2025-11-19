@@ -347,8 +347,8 @@ return( false );
 
 enum Compare_Ret SSsCompare(const SplineSet *ss1, const SplineSet *ss2,
 	real pt_err, real spline_err, SplinePoint **_hmfail) {
-    int cnt1, cnt2, bestcnt;
-    const SplineSet *ss, *s2s, *bestss;
+    int cnt1, cnt2, bestcnt = 0;
+    const SplineSet *ss, *s2s, *bestss = NULL;
     enum Compare_Ret info = 0;
     int allmatch;
     DBounds *b1, *b2;
