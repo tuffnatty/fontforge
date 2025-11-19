@@ -2911,7 +2911,7 @@ return( NULL );
 return( into );
     }
     /* Ok. If no outline font, try for a bitmap */
-    if ( nfnt_subcnt==0 ) {
+    if ( nfnt_subcnt==0 && font_subcnt!=0 ) {
 	nfnt_pos = font_pos;
 	nfnt_subcnt = font_subcnt;
     }
