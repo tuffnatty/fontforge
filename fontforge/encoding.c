@@ -1369,6 +1369,9 @@ static void CompressCMap(struct cmap *cmap) {
     if ( i==cmap->groups[cmt_coderange].n )	/* No need to remap */
 return;
 
+    if ( (cmap->groups[cmt_coderange].n + 1) * sizeof(struct remap) >= PTRDIFF_MAX )
+        return;  /* We're probably on a 32-bit system and cmap is broken */
+
     cmap->remap = calloc((unsigned)cmap->groups[cmt_coderange].n+1,sizeof(struct remap));
     base = 0;
     for ( i=0; i<cmap->groups[cmt_coderange].n; ++i )
