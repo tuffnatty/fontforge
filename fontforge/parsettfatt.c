@@ -3916,7 +3916,7 @@ return;
 		    else
 			len += strlen(sm->info->chars[sm->lig_comp_glyphs[j]]->name)+1;
 		}
-		if ( !err ) {
+		if ( !err && len > 0 ) {
 		    comp = malloc(len);
 		    *comp = '\0';
 		    for ( j=lcp; j<sm->lcp; ++j ) {
