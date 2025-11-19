@@ -87,7 +87,7 @@ static long FindXRef(FILE *pdf) {
     const size_t fillcnt = sizeof(buffer) - 1;
     char *pt;
 
-    if ( fseek(pdf,-fillcnt,SEEK_END)!=0 )
+    if ( fseek(pdf,-(long)fillcnt,SEEK_END)!=0 )
         return( -1 );
 
     if ( fread(buffer,1,fillcnt,pdf)!=fillcnt )
