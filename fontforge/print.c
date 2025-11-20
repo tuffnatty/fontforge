@@ -2844,7 +2844,7 @@ static void QueueIt(PI *pi) {
     #if !defined(__MINGW32__)
     int pid;
     int stdinno, i, status;
-    char *argv[40], buf[10];
+    char *argv[40], buf[16];
 
     if ( (pid=fork())==0 ) {
 	stdinno = fileno(stdin);
