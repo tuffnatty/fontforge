@@ -587,7 +587,8 @@ void TTFLoadBitmaps(FILE *ttf,struct ttfinfo *info,int onlyone) {
 	    for ( i=1; i<cnt; ++i )
 		if ( sizes[i].depth==1 && (biggest < 0 || sizes[i].ppem>sizes[biggest].ppem) )
 		    biggest = i;
-	    sel[biggest] = true;
+            if ( biggest != -1 )
+	        sel[biggest] = true;
 	} else {
 	    biggest=-1;
 	    for ( i=0; i<cnt; ++i ) {
