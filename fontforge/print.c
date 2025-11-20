@@ -2689,7 +2689,7 @@ static int AllChars( SplineFont *sf, const char *str) {
 return( false );
 	}
     } else {
-	int max = 0, j;
+	int max = 0, j = -1;
 	for ( i=0; i<sf->subfontcnt; ++i )
 	    if ( sf->subfonts[i]->glyphcnt>max ) max = sf->subfonts[i]->glyphcnt;
 	while ( (ch = utf8_ildb(&str))!='\0' ) {
@@ -2701,7 +2701,7 @@ return( false );
 		    if ( sf->subfonts[j]->glyphs[i]->unicodeenc == ch )
 	    break;
 	    }
-	    if ( i==max || !SCWorthOutputting(sf->subfonts[j]->glyphs[i]))
+	    if ( i==max || j == -1 || !SCWorthOutputting(sf->subfonts[j]->glyphs[i]))
 return( false );
 	}
     }
