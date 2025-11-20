@@ -4134,7 +4134,13 @@ static struct statetable *read_statetable(FILE *ttf, int ent_extras, int ismorx,
 	    st->nglyphs = 0;
 	}
 	st->classes = malloc(st->nglyphs);
-	fread(st->classes,1,st->nglyphs,ttf);
+        if ( fread(st->classes,1,st->nglyphs,ttf) < st->nglyphs ) {
+            if ( !error )
+                LogError(_("Premature end of file in mort table."));
+            info->bad_gx = true;
+            error = true;
+            st->nglyphs = 0;
+        }
 	for ( i=0; i<st->nglyphs; ++i ) {
 	    if ( /*st->classes[i]<0 ||*/ st->classes[i]>=st->nclasses ) {
 		if ( !error )
@@ -4175,8 +4181,13 @@ static struct statetable *read_statetable(FILE *ttf, int ent_extras, int ismorx,
 	if ( ent_max==old_ent_max )		/* Nothing more */
     break;
 	if ( ent_max>1000 ) {
+read_statetable_fail:
 	    LogError( _("It looks to me as though there's a morx sub-table with more than 1000\n transitions. Which makes me think there's probably an error\n" ));
+read_statetable_fail2:
 	    info->bad_gx = true;
+            free(ismorx ? st->classes2 : st->classes);
+            if ( ismorx )
+                info->morx_classes = NULL;
 	    free(st);
 return( NULL );
 	}
@@ -4193,12 +4204,8 @@ return( NULL );
 	    if ( new_state+1>state_max )
 		state_max = new_state+1;
 	}
-	if ( state_max>1000 ) {
-	    LogError( _("It looks to me as though there's a morx sub-table with more than 1000\n states. Which makes me think there's probably an error\n" ));
-	    info->bad_gx = true;
-	    free(st);
-return( NULL );
-	}
+	if ( state_max>1000 )
+            goto read_statetable_fail;
     }
 
     st->nstates = state_max;
@@ -4216,13 +4223,23 @@ return( NULL );
 	    st->state_table2[i] = getushort(ttf);
     } else {
 	st->state_table = malloc(st->nstates*st->nclasses);
-	fread(st->state_table,1,st->nstates*st->nclasses,ttf);
+	if ( fread(st->state_table,1,st->nstates*st->nclasses,ttf) < st->nstates*st->nclasses ) {
+	    LogError(_("Premature end of file while reading mort table"));
+            free(st->state_table);
+            goto read_statetable_fail2;
+        }
     }
 
 	/* parse the entry subtable */
     fseek(ttf,here+entry_off,SEEK_SET);
     st->transitions = malloc(st->nentries*st->entry_size);
-    fread(st->transitions,1,st->nentries*st->entry_size,ttf);
+    if ( fread(st->transitions,1,st->nentries*st->entry_size,ttf) < st->nentries*st->entry_size ) {
+	LogError(_("Premature end of file while reading mort table"));
+        free(st->transitions);
+        free(ismorx ? st->state_table2 : st->state_table);
+        goto read_statetable_fail2;
+    }
+
 return( st );
 }
 
