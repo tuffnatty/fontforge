@@ -4484,7 +4484,7 @@ static int PickCMap(struct cmap_encs *cmap_encs,int enccnt,int def) {
 	NULL, NULL, NULL, N_("Script|Central European"),
 /* 30*/ NULL, NULL, NULL };
 
-    choices = malloc(enccnt*sizeof(char *));
+    choices = malloc((unsigned)enccnt*sizeof(char *));
     for ( i=0; i<enccnt; ++i ) {
 	encname = NULL;
 	if ( cmap_encs[i].platform==1 && cmap_encs[i].specific<32 ) {
