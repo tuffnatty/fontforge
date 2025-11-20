@@ -206,11 +206,21 @@ return;
 	/* each row is byte aligned */
 	if ( bdf->clut==NULL || bdf->clut->clut_len==256 ) {
 	    for ( i=0; i<metrics->height; ++i )
-		fread(bdfc->bitmap+i*bdfc->bytes_per_line,1,bdfc->bytes_per_line,ttf);
+                if ( fread(bdfc->bitmap+i*bdfc->bytes_per_line,1,bdfc->bytes_per_line,ttf) < bdfc->bytes_per_line ) {
+ttfreadbmfglyph_eof:
+                    LogError(_("Premature end of file while reading GID %d"), gid);
+                    info->bad_embedded_bitmap = true;
+                    BDFCharFree(bdfc);
+                    bdf->glyphs[gid] = NULL;
+                    free(bdfc->bitmap);
+                    return;
+                }
 	} else if ( bdf->clut->clut_len==4 ) {
 	    for ( i=0; i<metrics->height; ++i ) {
 		for ( j=0; j<metrics->width; j+=4 ) {
 		    ch = getc(ttf);
+                    if ( ch == EOF )
+                        goto ttfreadbmfglyph_eof;
 		    bdfc->bitmap[i*bdfc->bytes_per_line+j] = (ch>>6);
 		    if ( j+1 < metrics->width )
 			bdfc->bitmap[i*bdfc->bytes_per_line+j+1] = (ch>>4)&3;
@@ -224,6 +234,8 @@ return;
 	    for ( i=0; i<metrics->height; ++i ) {
 		for ( j=0; j<metrics->width; j+=2 ) {
 		    ch = getc(ttf);
+                    if ( ch == EOF )
+                        goto ttfreadbmfglyph_eof;
 		    bdfc->bitmap[i*bdfc->bytes_per_line+j] = (ch>>4);
 		    if ( j+1 < metrics->width )
 			bdfc->bitmap[i*bdfc->bytes_per_line+j+1] = ch&0xf;
@@ -235,6 +247,8 @@ return;
 	if ( bdf->clut==NULL ) {
 	    for ( i=0; i<(metrics->height*metrics->width+7)/8; ++i ) {
 		ch = getc(ttf);
+                if ( ch == EOF )
+                    goto ttfreadbmfglyph_eof;
 		for ( j=0; j<8; ++j ) {
 		    l = (i*8+j)/metrics->width;
 		    p = (i*8+j)%metrics->width;
@@ -245,10 +259,13 @@ return;
 	} else if ( bdf->clut->clut_len==256 ) {
 	    /* well, yeah, it's bit aligned, but since pixels are bytes, it's byte aligned */
 	    for ( i=0; i<metrics->height; ++i )
-		fread(bdfc->bitmap+i*bdfc->bytes_per_line,1,bdfc->bytes_per_line,ttf);
+		if ( fread(bdfc->bitmap+i*bdfc->bytes_per_line,1,bdfc->bytes_per_line,ttf) < bdfc->bytes_per_line )
+                    goto ttfreadbmfglyph_eof;
 	} else if ( bdf->clut->clut_len==4 ) {
 	    for ( i=0; i<metrics->height*metrics->width; i+=4 ) {
 		ch = getc(ttf);
+                if ( ch == EOF )
+                    goto ttfreadbmfglyph_eof;
 		bdfc->bitmap[(i/metrics->width)*bdfc->bytes_per_line+i%metrics->width] = (ch>>6);
 		if ( i+1 < metrics->width*metrics->height )
 		    bdfc->bitmap[((i+1)/metrics->width)*bdfc->bytes_per_line+(i+1)%metrics->width] = (ch>>4)&3;
@@ -260,6 +277,8 @@ return;
 	} else if ( bdf->clut->clut_len==16 ) {
 	    for ( i=0; i<metrics->height*metrics->width; i+=2 ) {
 		ch = getc(ttf);
+                if ( ch == EOF )
+                    goto ttfreadbmfglyph_eof;
 		bdfc->bitmap[(i/metrics->width)*bdfc->bytes_per_line+i%metrics->width] = (ch>>4);
 		if ( i+1 < metrics->width*metrics->height )
 		    bdfc->bitmap[((i+1)/metrics->width)*bdfc->bytes_per_line+(i+1)%metrics->width] = ch&0xf;
